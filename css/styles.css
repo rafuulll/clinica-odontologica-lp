@@ -28,7 +28,16 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  /* `hidden` on <body> alone does not stop the document from scrolling
+     sideways on iOS Safari. `clip` on the root propagates to the viewport
+     and, unlike `hidden`, creates no scroll container — so the pinned
+     journey section keeps working. `hidden` is the fallback for browsers
+     without `clip`. */
+  overflow-x: hidden;
+  overflow-x: clip;
+}
 body {
   margin: 0;
   background: var(--paper);
@@ -38,6 +47,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  overflow-x: clip;
 }
 img { display: block; max-width: 100%; }
 a { color: inherit; text-decoration: none; }
@@ -309,7 +319,13 @@ em {
   position: relative;
   margin-top: calc(var(--gap) * 0.35);   /* clear of the marquee */
   padding-top: var(--gap);
-  padding-bottom: 9.4%;
+  padding-bottom: 5%;
+  /* The photos are meant to run off the screen edges. Clipping them here, at
+     the source, means the overflow never reaches <body> — which is the only
+     way to reliably stop the sideways drag on iOS. `clip` (not `hidden`)
+     keeps the vertical axis visible instead of turning it into a scroller. */
+  overflow-x: hidden;
+  overflow-x: clip;
 }
 .about__photos {
   position: absolute;
@@ -346,20 +362,32 @@ em {
 }
 .about__inner .btn { margin-top: 35px; }
 
+/* All four share one box: same width, same aspect ratio, and a single
+   margin per row — so each pair lines up and no photo reads bigger than
+   the others. The source files carry their tilt and a paper-coloured
+   margin baked in (ratios 1.10–1.21); a 1.15 box crops at most 2.3% per
+   side, which stays inside that margin and never clips the photo itself. */
 .about__photo {
   position: absolute;
   border-radius: 12px;
   object-fit: cover;
+  width: var(--photo-w);
+  aspect-ratio: 1.15;
   height: auto;
 }
-.about__photos--top    .about__photo { top: 0; }
-.about__photos--bottom .about__photo { bottom: 0; }
+.about__photos--top    .about__photo { top: 0;    margin-top: var(--photo-top); }
+.about__photos--bottom .about__photo { bottom: 0; margin-bottom: var(--photo-bottom); }
 
-/* Desktop — % of the 1920px frame, exactly as in Figma */
-.about__photo--1 { left: 16.04%; width: 14.81%; aspect-ratio: 284 / 253; margin-top: 2.29%; }
-.about__photo--2 { left: 68.33%; width: 15.00%; aspect-ratio: 288 / 239; margin-top: 2.92%; }
-.about__photo--3 { left: 18.23%; width: 13.91%; aspect-ratio: 267 / 222; margin-bottom: 7.34%; }
-.about__photo--4 { left: 69.76%; width: 18.41%; aspect-ratio: 298 / 270; }
+/* Desktop — % of the 1920px frame */
+.about {
+  --photo-w: 14.5%;
+  --photo-top: 2.5%;
+  --photo-bottom: 7.34%;
+}
+.about__photo--1,
+.about__photo--3 { left: 17.00%; }
+.about__photo--2,
+.about__photo--4 { left: 68.83%; }
 
 /* ============================================================
    SERVICES — editorial index
@@ -498,7 +526,10 @@ em {
   border-radius: 24px;
   background: var(--panel);
   overflow: hidden;
-  touch-action: pan-y;
+  touch-action: pan-y;   /* the browser keeps vertical scroll, we take sideways */
+  cursor: ew-resize;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .compare__img {
   position: absolute;
@@ -506,10 +537,18 @@ em {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* A mousedown on an <img> starts the browser's native image drag, which
+     fires pointercancel and kills the slider mid-gesture. */
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
 }
 /* Clipping (not resizing) keeps the "before" frame perfectly aligned. */
 .compare__img--before { clip-path: inset(0 calc(100% - var(--pos)) 0 0); }
 
+/* Keyboard only — pointer input is handled on .compare itself, because a
+   native range is not reliably draggable by touch. */
 .compare__range {
   position: absolute;
   inset: 0;
@@ -517,6 +556,7 @@ em {
   height: 100%;
   margin: 0;
   opacity: 0;
+  pointer-events: none;
   cursor: ew-resize;
   z-index: 4;
   -webkit-appearance: none;
@@ -1252,11 +1292,17 @@ em {
      Here the photos are wide and the copy is centred, so unlike desktop the
      copy has to start below them: padding-top clears the top pair, and it is
      a percentage of the width so the clearance scales with the photos. */
-  .about { padding-top: 50%; padding-bottom: 29.36%; }
-  .about__photo--1 { left:  5.34%; width: 22.79%; aspect-ratio: 175 / 155; margin-top: 23.18%; }
-  .about__photo--2 { left: 70.05%; width: 24.74%; aspect-ratio: 190 / 158; margin-top: 25.78%; }
-  .about__photo--3 { left:  5.34%; width: 22.79%; aspect-ratio: 175 / 145; margin-bottom: 5.92%; }
-  .about__photo--4 { left: 70.06%; width: 26.09%; aspect-ratio: 298 / 270; }
+  .about {
+    padding-top: 50%;
+    padding-bottom: 29.36%;
+    --photo-w: 23%;
+    --photo-top: 23.18%;
+    --photo-bottom: 5.92%;
+  }
+  .about__photo--1,
+  .about__photo--3 { left:  5.34%; }
+  .about__photo--2,
+  .about__photo--4 { left: 71.80%; }
   .about__photo { border-radius: 18px; }
   .about__title { font-size: 38px; line-height: 43px; letter-spacing: -1.4px; }
   .about__paragraph { margin-top: 24px; font-size: 16px; line-height: 27px; }
@@ -1309,12 +1355,24 @@ em {
     transition: transform 0.6s var(--ease);
     will-change: transform;
   }
-  .team-card {
+  /* Every card keeps the same box; only the neighbours are scaled down.
+     Animating `height` reflows the whole flex line, which is what made all
+     four cards jump on each change — a transform touches no layout at all,
+     so the active one simply eases down as the next one grows in. Scaling
+     from the bottom edge keeps every card sitting on the same baseline. */
+  /* `.team-card.is-active` outranks `.team-card`, so the desktop height has
+     to be reset explicitly here or the active card shrinks to 600px. */
+  .team-card,
+  .team-card.is-active {
     flex: 0 0 420px;
-    height: min(730px, 95.1vw);
-    transition: height 0.6s var(--ease);
+    height: min(805px, 104.8vw);
   }
-  .team-card.is-active { height: min(805px, 104.8vw); }
+  .team-card {
+    transform: scale(0.91);
+    transform-origin: bottom center;
+    transition: transform 0.6s var(--ease);
+  }
+  .team-card.is-active { transform: none; }
   .team-card__socials { top: 6%; }
 
   .journey__title { font-size: 38px; line-height: 43px; letter-spacing: -1.4px; max-width: 520px; }
@@ -1338,7 +1396,9 @@ em {
   .cta__panel { padding: 72px 40px; }
   /* The serif-italic line needs more room than the sans lines above it. */
   .cta__title { font-size: 40px; line-height: 1.22; letter-spacing: -1.5px; max-width: 520px; }
-  .cta__title em { margin-top: 8px; }
+  /* The -3px tracking is tuned for the 62px desktop size; left as-is at 40px
+     it eats the word spaces and the line reads as one word. */
+  .cta__title em { margin-top: 8px; letter-spacing: -1.2px; }
   .cta__text { font-size: 15px; line-height: 26px; }
 
   .footer__top { grid-template-columns: repeat(3, 213px); gap: 24px; justify-content: start; }
@@ -1380,12 +1440,18 @@ em {
   .logostrip__group { height: 18px; gap: 44px; padding-right: 44px; }
   .logostrip__group img { height: 18px; }
 
-  .about { padding-top: 84.3%; padding-bottom: 59.28%; }
+  .about {
+    padding-top: 84.3%;
+    padding-bottom: 59.28%;
+    --photo-w: 41.87%;
+    --photo-top: 33.60%;
+    --photo-bottom: 15.01%;
+  }
   .about__photo { border-radius: 16px; }
-  .about__photo--1 { left: -3.47%; width: 41.87%; aspect-ratio: 157 / 150; margin-top: 33.60%; }
-  .about__photo--2 { left: 66.13%; width: 41.87%; aspect-ratio: 157 / 128; margin-top: 43.20%; }
-  .about__photo--3 { left: -5.60%; width: 41.87%; aspect-ratio: 157 / 128; margin-bottom: 15.01%; }
-  .about__photo--4 { left: 63.54%; width: 46.58%; aspect-ratio: 298 / 270; }
+  .about__photo--1,
+  .about__photo--3 { left: -4.50%; }
+  .about__photo--2,
+  .about__photo--4 { left: 64.13%; }
   .about__title { font-size: 30px; line-height: 34px; letter-spacing: -1px; }
   .about__paragraph { margin-top: 20px; font-size: 15px; line-height: 25.5px; }
 
@@ -1415,8 +1481,8 @@ em {
   .team__viewport::before,
   .team__viewport::after { width: 56px; }
   .team__track { gap: 12px; margin-top: 32px; }
-  .team-card { flex: 0 0 min(300px, 80vw); height: min(525px, 140vw); }
-  .team-card.is-active { height: min(575px, 153.3vw); }
+  .team-card,
+  .team-card.is-active { flex: 0 0 min(300px, 80vw); height: min(575px, 153.3vw); }
 
   /* Stacked: every step reads in full, the rail still tracks the scroll. */
   .journey__title { font-size: 30px; line-height: 34px; letter-spacing: -1px; }
@@ -1456,6 +1522,7 @@ em {
   .cta .wrap { padding: 0 12px; }
   .cta__panel { padding: 56px 28px; border-radius: 24px; }
   .cta__title { font-size: 30px; line-height: 1.3; letter-spacing: -1px; }
+  .cta__title em { margin-top: 10px; letter-spacing: -0.6px; }
   .cta__text { font-size: 15px; line-height: 25.5px; }
   .cta__actions { flex-direction: column; gap: 12px; }
 

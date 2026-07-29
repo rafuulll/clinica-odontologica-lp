@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="assets/images/hero.jpg" fetchpriority="high">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -15,7 +16,7 @@
 <!-- ============================ HEADER ============================ -->
 <header class="header">
   <div class="wrap header__inner">
-    <a href="#" class="header__logo"><img src="assets/images/logo.png" alt="Meridian Dental Studio"></a>
+    <a href="#" class="header__logo"><img src="assets/images/logo.png" alt="Meridian Dental Studio" width="450" height="69" decoding="async" fetchpriority="high"></a>
 
     <nav class="header__nav" aria-label="Navegação principal">
       <a href="#sobre">Sobre</a>
@@ -47,7 +48,7 @@
 <!-- ============================ HERO ============================ -->
 <section class="hero">
   <div class="hero__photo">
-    <img src="assets/images/hero.jpg" alt="Dentista da Meridian sorrindo em consultório moderno">
+    <img src="assets/images/hero.jpg" alt="Dentista da Meridian sorrindo em consultório moderno" width="1961" height="1093" decoding="async" fetchpriority="high">
   </div>
 
   <div class="wrap hero__inner">
@@ -67,20 +68,20 @@
          The copy is hidden from assistive tech. -->
     <div class="logostrip__track">
       <div class="logostrip__group">
-        <img src="assets/images/logo-1.png" alt="">
-        <img src="assets/images/logo-2.png" alt="">
-        <img src="assets/images/logo-3.png" alt="">
-        <img src="assets/images/logo-4.png" alt="">
-        <img src="assets/images/logo-5.png" alt="">
-        <img src="assets/images/logo-6.png" alt="">
+        <img src="assets/images/logo-1.png" alt="" width="233" height="40" loading="lazy" decoding="async">
+        <img src="assets/images/logo-2.png" alt="" width="30" height="40" loading="lazy" decoding="async">
+        <img src="assets/images/logo-3.png" alt="" width="58" height="40" loading="lazy" decoding="async">
+        <img src="assets/images/logo-4.png" alt="" width="216" height="40" loading="lazy" decoding="async">
+        <img src="assets/images/logo-5.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+        <img src="assets/images/logo-6.png" alt="" width="158" height="46" loading="lazy" decoding="async">
       </div>
       <div class="logostrip__group" aria-hidden="true">
-        <img src="assets/images/logo-1.png" alt="">
-        <img src="assets/images/logo-2.png" alt="">
-        <img src="assets/images/logo-3.png" alt="">
-        <img src="assets/images/logo-4.png" alt="">
-        <img src="assets/images/logo-5.png" alt="">
-        <img src="assets/images/logo-6.png" alt="">
+        <img src="assets/images/logo-1.png" alt="" width="233" height="40" loading="lazy" decoding="async">
+        <img src="assets/images/logo-2.png" alt="" width="30" height="40" loading="lazy" decoding="async">
+        <img src="assets/images/logo-3.png" alt="" width="58" height="40" loading="lazy" decoding="async">
+        <img src="assets/images/logo-4.png" alt="" width="216" height="40" loading="lazy" decoding="async">
+        <img src="assets/images/logo-5.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+        <img src="assets/images/logo-6.png" alt="" width="158" height="46" loading="lazy" decoding="async">
       </div>
     </div>
   </div>
@@ -89,8 +90,8 @@
 <!-- ============================ ABOUT ============================ -->
 <section class="about" id="sobre">
   <div class="about__photos about__photos--top">
-    <img class="about__photo about__photo--1" src="assets/images/about-3.jpg" alt="Paciente sendo atendida na clínica Meridian">
-    <img class="about__photo about__photo--2" src="assets/images/about-1.jpg" alt="Dentista da Meridian realizando um procedimento">
+    <img class="about__photo about__photo--1" src="assets/images/about-3.jpg" alt="Paciente sendo atendida na clínica Meridian" width="285" height="253" loading="lazy" decoding="async">
+    <img class="about__photo about__photo--2" src="assets/images/about-1.jpg" alt="Dentista da Meridian realizando um procedimento" width="288" height="239" loading="lazy" decoding="async">
   </div>
 
   <div class="wrap about__inner">
@@ -101,8 +102,8 @@
   </div>
 
   <div class="about__photos about__photos--bottom">
-    <img class="about__photo about__photo--3" src="assets/images/about-2.jpg" alt="Equipamento de diagnóstico digital da Meridian">
-    <img class="about__photo about__photo--4" src="assets/images/about-4.jpg" alt="Dentista analisando uma radiografia com a paciente">
+    <img class="about__photo about__photo--3" src="assets/images/about-2.jpg" alt="Equipamento de diagnóstico digital da Meridian" width="267" height="222" loading="lazy" decoding="async">
+    <img class="about__photo about__photo--4" src="assets/images/about-4.jpg" alt="Dentista analisando uma radiografia com a paciente" width="298" height="270" loading="lazy" decoding="async">
   </div>
 </section>
 
@@ -111,7 +112,6 @@
   <div class="wrap">
     <header class="section-eyebrow">
       <span class="eyebrow eyebrow--ink">Serviços</span>
-      <span class="section-eyebrow__count">06</span>
     </header>
 
     <div class="services__intro">
@@ -176,8 +176,8 @@
       </div>
 
       <div class="compare">
-        <img class="compare__img compare__img--after" src="assets/images/after.jpg" alt="Sorriso depois do tratamento">
-        <img class="compare__img compare__img--before" src="assets/images/before.jpg" alt="Sorriso antes do tratamento">
+        <img class="compare__img compare__img--after" draggable="false" src="assets/images/after.jpg" alt="Sorriso depois do tratamento" width="1600" height="893" loading="lazy" decoding="async">
+        <img class="compare__img compare__img--before" draggable="false" src="assets/images/before.jpg" alt="Sorriso antes do tratamento" width="1600" height="893" loading="lazy" decoding="async">
 
         <span class="compare__chip compare__chip--before">Antes</span>
         <span class="compare__chip compare__chip--after">Depois</span>
@@ -208,11 +208,11 @@
     <div class="team__viewport">
       <div class="team__track">
         <article class="team-card is-active">
-          <img class="team-card__photo" src="assets/images/team-mario.png" alt="Dr. Mário Dantas">
+          <img class="team-card__photo" src="assets/images/team-mario.png" alt="Dr. Mário Dantas" width="900" height="600" loading="lazy" decoding="async">
           <div class="team-card__socials">
-            <a class="team-card__social" href="#" aria-label="Instagram"><img src="assets/icons/instagram.png" alt=""></a>
-            <a class="team-card__social" href="#" aria-label="WhatsApp"><img src="assets/icons/whatsapp.png" alt=""></a>
-            <a class="team-card__social" href="#" aria-label="E-mail"><img src="assets/icons/email.png" alt=""></a>
+            <a class="team-card__social" href="#" aria-label="Instagram"><img src="assets/icons/instagram.png" alt="" width="100" height="100" loading="lazy" decoding="async"></a>
+            <a class="team-card__social" href="#" aria-label="WhatsApp"><img src="assets/icons/whatsapp.png" alt="" width="100" height="100" loading="lazy" decoding="async"></a>
+            <a class="team-card__social" href="#" aria-label="E-mail"><img src="assets/icons/email.png" alt="" width="100" height="100" loading="lazy" decoding="async"></a>
           </div>
           <div class="team-card__panel">
             <p class="team-card__name">Dr. Mário Dantas</p>
@@ -223,11 +223,11 @@
         </article>
 
         <article class="team-card">
-          <img class="team-card__photo" src="assets/images/team-sofia.png" alt="Dra. Sofia Lindt">
+          <img class="team-card__photo" src="assets/images/team-sofia.png" alt="Dra. Sofia Lindt" width="900" height="600" loading="lazy" decoding="async">
           <div class="team-card__socials">
-            <a class="team-card__social" href="#" aria-label="Instagram"><img src="assets/icons/instagram.png" alt=""></a>
-            <a class="team-card__social" href="#" aria-label="WhatsApp"><img src="assets/icons/whatsapp.png" alt=""></a>
-            <a class="team-card__social" href="#" aria-label="E-mail"><img src="assets/icons/email.png" alt=""></a>
+            <a class="team-card__social" href="#" aria-label="Instagram"><img src="assets/icons/instagram.png" alt="" width="100" height="100" loading="lazy" decoding="async"></a>
+            <a class="team-card__social" href="#" aria-label="WhatsApp"><img src="assets/icons/whatsapp.png" alt="" width="100" height="100" loading="lazy" decoding="async"></a>
+            <a class="team-card__social" href="#" aria-label="E-mail"><img src="assets/icons/email.png" alt="" width="100" height="100" loading="lazy" decoding="async"></a>
           </div>
           <div class="team-card__panel">
             <p class="team-card__name">Dra. Sofia Lindt</p>
@@ -238,11 +238,11 @@
         </article>
 
         <article class="team-card">
-          <img class="team-card__photo" src="assets/images/team-andre.png" alt="Dr. André Vale">
+          <img class="team-card__photo" src="assets/images/team-andre.png" alt="Dr. André Vale" width="900" height="502" loading="lazy" decoding="async">
           <div class="team-card__socials">
-            <a class="team-card__social" href="#" aria-label="Instagram"><img src="assets/icons/instagram.png" alt=""></a>
-            <a class="team-card__social" href="#" aria-label="WhatsApp"><img src="assets/icons/whatsapp.png" alt=""></a>
-            <a class="team-card__social" href="#" aria-label="E-mail"><img src="assets/icons/email.png" alt=""></a>
+            <a class="team-card__social" href="#" aria-label="Instagram"><img src="assets/icons/instagram.png" alt="" width="100" height="100" loading="lazy" decoding="async"></a>
+            <a class="team-card__social" href="#" aria-label="WhatsApp"><img src="assets/icons/whatsapp.png" alt="" width="100" height="100" loading="lazy" decoding="async"></a>
+            <a class="team-card__social" href="#" aria-label="E-mail"><img src="assets/icons/email.png" alt="" width="100" height="100" loading="lazy" decoding="async"></a>
           </div>
           <div class="team-card__panel">
             <p class="team-card__name">Dr. André Vale</p>
@@ -253,11 +253,11 @@
         </article>
 
         <article class="team-card">
-          <img class="team-card__photo" src="assets/images/team-helena.png" alt="Dra. Helena Marques">
+          <img class="team-card__photo" src="assets/images/team-helena.png" alt="Dra. Helena Marques" width="900" height="600" loading="lazy" decoding="async">
           <div class="team-card__socials">
-            <a class="team-card__social" href="#" aria-label="Instagram"><img src="assets/icons/instagram.png" alt=""></a>
-            <a class="team-card__social" href="#" aria-label="WhatsApp"><img src="assets/icons/whatsapp.png" alt=""></a>
-            <a class="team-card__social" href="#" aria-label="E-mail"><img src="assets/icons/email.png" alt=""></a>
+            <a class="team-card__social" href="#" aria-label="Instagram"><img src="assets/icons/instagram.png" alt="" width="100" height="100" loading="lazy" decoding="async"></a>
+            <a class="team-card__social" href="#" aria-label="WhatsApp"><img src="assets/icons/whatsapp.png" alt="" width="100" height="100" loading="lazy" decoding="async"></a>
+            <a class="team-card__social" href="#" aria-label="E-mail"><img src="assets/icons/email.png" alt="" width="100" height="100" loading="lazy" decoding="async"></a>
           </div>
           <div class="team-card__panel">
             <p class="team-card__name">Dra. Helena Marques</p>
@@ -456,7 +456,7 @@
 <footer class="footer">
   <div class="wrap footer__top">
     <div class="footer__brand">
-      <img class="footer__logo" src="assets/images/logo.png" alt="Meridian Dental Studio">
+      <img class="footer__logo" src="assets/images/logo.png" alt="Meridian Dental Studio" width="450" height="69" loading="lazy" decoding="async">
       <p class="footer__tagline">Odontologia particular, com precisão e paciência.</p>
     </div>
 

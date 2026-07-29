@@ -260,21 +260,104 @@ createCarousel({
 })();
 
 /* ------------------------------------------------------------------
-   Results — before/after. A transparent range input sits over the frame,
-   so dragging, touch and arrow keys all work without extra code.
+   Results — before/after.
+
+   A bare range input is not draggable by touch in practice: iOS only
+   reacts near the thumb, so on a phone the comparison felt dead. Pointer
+   events drive it instead, and the input is kept purely for the keyboard.
+
+   Vertical swipes must still scroll the page, so a drag only begins once
+   the gesture is clearly horizontal.
    ------------------------------------------------------------------ */
 (function () {
   var compare = document.querySelector(".compare");
   if (!compare) return;
 
   var range = compare.querySelector(".compare__range");
-  if (!range) return;
 
-  function apply() {
-    compare.style.setProperty("--pos", range.value + "%");
+  function setPos(value) {
+    var pct = Math.round(Math.max(0, Math.min(100, value)) * 100) / 100;
+    compare.style.setProperty("--pos", pct + "%");
+    if (range) range.value = pct;
   }
-  range.addEventListener("input", apply);
-  apply();
+
+  function pctFromX(clientX) {
+    var rect = compare.getBoundingClientRect();
+    if (!rect.width) return 50;
+    return ((clientX - rect.left) / rect.width) * 100;
+  }
+
+  if (range) {
+    range.addEventListener("input", function () { setPos(parseFloat(range.value)); });
+    setPos(parseFloat(range.value));
+  } else {
+    setPos(50);
+  }
+
+  if (!window.PointerEvent) return;
+
+  var startX = 0, startY = 0, dragging = false, decided = false, pointerId = null;
+
+  // Capture is a nicety — losing it must never stop the drag from working.
+  function capture(id) {
+    try { compare.setPointerCapture(id); } catch (err) { /* not a live pointer */ }
+  }
+
+  // Belt and braces: even with pointer-events off on the images, anything
+  // else that starts a native drag inside the frame would cancel the gesture.
+  compare.addEventListener("dragstart", function (event) { event.preventDefault(); });
+
+  compare.addEventListener("pointerdown", function (event) {
+    if (event.button !== undefined && event.button !== 0) return;
+    // Stops the text/image drag that would otherwise fire pointercancel.
+    if (event.pointerType === "mouse" && event.cancelable) event.preventDefault();
+    pointerId = event.pointerId;
+    startX = event.clientX;
+    startY = event.clientY;
+    decided = dragging = false;
+
+    // A mouse press is unambiguous, so it grabs the handle immediately.
+    if (event.pointerType === "mouse") {
+      decided = dragging = true;
+      setPos(pctFromX(event.clientX));
+      capture(pointerId);
+    }
+  });
+
+  compare.addEventListener("pointermove", function (event) {
+    if (pointerId === null || event.pointerId !== pointerId) return;
+
+    if (!decided) {
+      var dx = Math.abs(event.clientX - startX);
+      var dy = Math.abs(event.clientY - startY);
+      if (dx < 6 && dy < 6) return;          // not enough movement to tell yet
+      decided = true;
+      dragging = dx > dy;                    // sideways means drag, otherwise let it scroll
+      if (dragging) capture(pointerId);
+    }
+    if (!dragging) return;
+
+    if (event.cancelable) event.preventDefault();
+    setPos(pctFromX(event.clientX));
+  });
+
+  function end(event) {
+    if (pointerId === null || event.pointerId !== pointerId) return;
+    // A tap that never turned into a drag still jumps to that spot.
+    if (!dragging && Math.abs(event.clientX - startX) < 6 && Math.abs(event.clientY - startY) < 6) {
+      setPos(pctFromX(event.clientX));
+    }
+    try {
+      if (compare.hasPointerCapture && compare.hasPointerCapture(pointerId)) {
+        compare.releasePointerCapture(pointerId);
+      }
+    } catch (err) { /* nothing to release */ }
+    pointerId = null;
+    decided = dragging = false;
+  }
+
+  compare.addEventListener("pointerup", end);
+  compare.addEventListener("pointercancel", end);
 })();
 
 /* ------------------------------------------------------------------
