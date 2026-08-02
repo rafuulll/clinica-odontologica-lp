@@ -161,9 +161,13 @@ function createCarousel(options) {
   if (prevBtn) prevBtn.addEventListener("click", function () { setIndex(index - 1); });
   if (nextBtn) nextBtn.addEventListener("click", function () { setIndex(index + 1); });
 
+  var suppressClick = false;
   if (options.clickable) {
     cards.forEach(function (card, i) {
-      card.addEventListener("click", function () { setIndex(i); });
+      card.addEventListener("click", function () {
+        if (suppressClick) return;
+        setIndex(i);
+      });
     });
   }
 
@@ -175,6 +179,90 @@ function createCarousel(options) {
   if (slidesQuery.addEventListener) slidesQuery.addEventListener("change", layout);
   // Card sizes depend on images, so re-measure once they have loaded.
   window.addEventListener("load", layout);
+
+  /* ------------------------------------------------------------
+     Drag to change cards — only where the track actually slides
+     (slidesQuery: mobile/tablet), never on desktop's 4-up grid.
+     Same pointer-events pattern as the before/after slider: a 6px
+     direction-lock so a vertical swipe still scrolls the page, and
+     the drag only takes over once it is clearly sideways.
+     ------------------------------------------------------------ */
+  if (window.PointerEvent) {
+    var startX = 0, startY = 0, dragging = false, decided = false, pointerId = null, baseOffset = 0;
+
+    function currentOffsetPx() {
+      var m = getComputedStyle(track).transform;
+      if (m === "none") return 0;
+      var parts = m.match(/matrix\(([^)]+)\)/);
+      return parts ? parseFloat(parts[1].split(",")[4]) : 0;
+    }
+
+    track.addEventListener("dragstart", function (event) { event.preventDefault(); });
+
+    track.addEventListener("pointerdown", function (event) {
+      if (!slidesQuery.matches) return;
+      if (event.button !== undefined && event.button !== 0) return;
+      pointerId = event.pointerId;
+      startX = event.clientX;
+      startY = event.clientY;
+      baseOffset = currentOffsetPx();
+      decided = dragging = false;
+    });
+
+    track.addEventListener("pointermove", function (event) {
+      if (pointerId === null || event.pointerId !== pointerId) return;
+
+      if (!decided) {
+        var dx = Math.abs(event.clientX - startX);
+        var dy = Math.abs(event.clientY - startY);
+        if (dx < 6 && dy < 6) return;             // not enough movement to tell yet
+        decided = true;
+        dragging = dx > dy;                        // sideways means drag, otherwise let it scroll
+        if (dragging) {
+          try { track.setPointerCapture(pointerId); } catch (err) { /* not a live pointer */ }
+          track.style.transition = "none";          // follow the finger with no lag
+        }
+      }
+      if (!dragging) return;
+
+      if (event.cancelable) event.preventDefault();
+      track.style.transform = "translateX(" + (baseOffset + (event.clientX - startX)) + "px)";
+    });
+
+    function end(event) {
+      if (pointerId === null || event.pointerId !== pointerId) return;
+      try {
+        if (track.hasPointerCapture && track.hasPointerCapture(pointerId)) {
+          track.releasePointerCapture(pointerId);
+        }
+      } catch (err) { /* nothing to release */ }
+      pointerId = null;
+
+      if (dragging) {
+        // Whichever card is nearest the viewport's centre becomes active.
+        // This has to run *while* the drag's displacement is still applied —
+        // clearing the transform first would snap back to the pre-drag
+        // layout and measure the wrong thing.
+        var centre = viewport.getBoundingClientRect().left + viewport.clientWidth / 2;
+        var nearest = 0, best = Infinity;
+        cards.forEach(function (card, i) {
+          var r = card.getBoundingClientRect();
+          var d = Math.abs((r.left + r.width / 2) - centre);
+          if (d < best) { best = d; nearest = i; }
+        });
+        track.style.transition = "";                // restore the CSS easing for the settle
+        track.style.transform = "";
+        setIndex(nearest);                           // layout() animates the rest of the way there
+        // A drag's trailing click (still fired by some browsers/devices even
+        // after preventDefault on the move) must not re-select a neighbour.
+        suppressClick = true;
+        setTimeout(function () { suppressClick = false; }, 80);
+      }
+      decided = dragging = false;
+    }
+    track.addEventListener("pointerup", end);
+    track.addEventListener("pointercancel", end);
+  }
 
   // Start on the second card so there is always one to either side, rather
   // than opening with an empty gap on the left.

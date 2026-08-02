@@ -1,8 +1,26 @@
 /* ============================================================
    MERIDIAN DENTAL STUDIO
-   Every value below is taken 1:1 from the Figma file.
    Desktop is the base; tablet (<1024px) and mobile (<768px)
    override it with the values from their own Figma frames.
+
+   TYPE SCALE — every font-size on the site is one of these steps.
+   (Fluid clamp() sizes — services__title, testimonial cards, the
+   journey step numeral — flex between two of these on purpose and
+   are left as clamp(), not a fixed step.) Line-heights below 20px
+   ride a single 1.7 ratio; larger ones are set per heading, rounded
+   to a whole pixel — no decimals left over from the Figma export.
+
+     76px  hero title              44px  services title (clamp top)
+     62px  CTA title               34px  journey-detail heading
+     54px  about/team/testimonials 28px  service index numeral
+           title
+     46px  results/journey/faq     18px  FAQ question, icon glyphs
+           title
+     17px  intro lede (hero/about) 16px  secondary body (CTA copy,
+                                          card names)
+     15px  body (default)          14px  small UI (nav, buttons)
+     13px  small print             12px  eyebrows, captions
+     11px  micro labels
    ============================================================ */
 :root {
   --paper:      #f7f4ef;
@@ -382,7 +400,7 @@ em {
   margin-top: 22px;
   max-width: 520px;
   font-size: 17px;
-  line-height: 28.9px;
+  line-height: 29px;
   color: var(--body);
 }
 .hero__actions {
@@ -482,7 +500,7 @@ em {
 .about__title {
   font-weight: 400;
   font-size: 54px;
-  line-height: 63.72px;
+  line-height: 64px;
   letter-spacing: -3px;
   color: var(--ink);
 }
@@ -491,7 +509,7 @@ em {
   margin-top: 48px;
   max-width: 572px;
   font-size: 17px;
-  line-height: 29.25px;
+  line-height: 29px;
   color: var(--body);
 }
 .about__inner .btn { margin-top: 35px; }
@@ -667,14 +685,14 @@ em {
 .results__title {
   font-weight: 400;
   font-size: 46px;
-  line-height: 52.9px;
+  line-height: 53px;
   letter-spacing: -3px;
   color: var(--ink);
 }
 .results__paragraph {
   margin-top: 22px;
   font-size: 15px;
-  line-height: 26.3px;
+  line-height: 26px;
   color: var(--body);
 }
 .results__case {
@@ -867,6 +885,11 @@ em {
   height: 87%;
   object-fit: cover;
   object-position: center;
+  /* A mousedown on an <img> starts the browser's native image drag, which
+     fires pointercancel and kills the carousel-drag gesture mid-swipe. */
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
   /* Only the dentist in focus is in colour. */
   filter: grayscale(1);
   transition: height 0.55s var(--ease), filter 0.6s var(--ease);
@@ -941,7 +964,7 @@ em {
 .team-card__bio {
   margin-top: 12px;
   font-size: 12px;
-  line-height: 21.6px;
+  line-height: 22px;
   color: var(--body);
 }
 .team-card__chip {
@@ -953,7 +976,7 @@ em {
   border-radius: 999px;
   background: rgba(255,255,255,0.90);
   font-family: inherit;
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--soft);
   z-index: 2;
   cursor: pointer;
@@ -1002,7 +1025,7 @@ em {
   max-width: 465px;
   font-weight: 400;
   font-size: 46px;
-  line-height: 50.1px;
+  line-height: 53px;   /* matches results__title/faq__title — same size, same role */
   letter-spacing: -2px;
   color: var(--ink);
 }
@@ -1011,7 +1034,7 @@ em {
   margin-top: 38px;
   max-width: 520px;
   font-size: 15px;
-  line-height: 26.3px;
+  line-height: 26px;
   color: var(--body);
 }
 .journey__body {
@@ -1096,7 +1119,7 @@ em {
   margin-top: 34px;
   font-weight: 400;
   font-size: 34px;
-  line-height: 39.4px;
+  line-height: 39px;
   letter-spacing: -1.2px;
   color: var(--ink);
 }
@@ -1104,7 +1127,7 @@ em {
   margin-top: 27px;
   max-width: 460px;
   font-size: 15px;
-  line-height: 26.3px;
+  line-height: 26px;
   color: var(--body);
 }
 
@@ -1184,7 +1207,7 @@ em {
 }
 .testimonial-card figcaption { margin-top: clamp(14px, 1.4vw, 27px); }
 .testimonial-card__name { font-size: clamp(12px, 0.73vw, 14px); font-weight: 600; color: var(--ink); }
-.testimonial-card__meta { margin-top: 4px; font-size: clamp(11px, 0.65vw, 12.5px); color: var(--faint); }
+.testimonial-card__meta { margin-top: 4px; font-size: clamp(11px, 0.65vw, 12px); color: var(--faint); }
 
 /* ============================================================
    FAQ
@@ -1198,7 +1221,7 @@ em {
   margin-top: 34px;
   font-weight: 400;
   font-size: 46px;
-  line-height: 52.9px;
+  line-height: 53px;
   letter-spacing: -3px;
   color: var(--ink);
 }
@@ -1253,7 +1276,7 @@ em {
   max-width: 669px;
   padding-bottom: 28px;
   font-size: 15px;
-  line-height: 26.3px;
+  line-height: 26px;
   color: var(--body);
 }
 
@@ -1277,7 +1300,7 @@ em {
   max-width: 735px;
   font-weight: 400;
   font-size: 62px;
-  line-height: 68.2px;
+  line-height: 68px;
   letter-spacing: -3px;
   color: var(--paper);
 }
@@ -1289,7 +1312,7 @@ em {
   margin: 33px auto 0;
   max-width: 554px;
   font-size: 16px;
-  line-height: 27.2px;
+  line-height: 27px;
   color: #b9c4d9;
 }
 .cta__actions {
@@ -1335,7 +1358,7 @@ em {
 .footer__tagline {
   margin-top: 21px;
   max-width: 306px;
-  font-size: 13.5px;
+  font-size: 13px;
   line-height: 23px;
   color: var(--faint);
 }
@@ -1349,8 +1372,8 @@ em {
 .footer__col a {
   display: block;
   margin-top: 11px;
-  font-size: 13.5px;
-  line-height: 21.6px;
+  font-size: 13px;
+  line-height: 22px;
   color: var(--soft);
 }
 .footer__col a + a { margin-top: 12px; }
@@ -1428,7 +1451,12 @@ em {
     margin-top: 0;
     transition: transform 0.6s var(--ease);
     will-change: transform;
+    touch-action: pan-y;   /* browser keeps vertical scroll, JS takes sideways */
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
   }
+  .testimonials__track:active { cursor: grabbing; }
   .testimonial-card {
     position: static;
     flex: 0 0 420px;
@@ -1562,6 +1590,7 @@ em {
     margin-top: 48px;
     transition: transform 0.6s var(--ease);
     will-change: transform;
+    touch-action: pan-y;   /* browser keeps vertical scroll, JS takes sideways */
   }
   /* Every card keeps the same box; only the neighbours are scaled down.
      Animating `height` reflows the whole flex line, which is what made all
@@ -1594,12 +1623,12 @@ em {
   .journey-detail__heading { margin-top: 22px; font-size: 24px; line-height: 28px; }
   .journey-detail__text { margin-top: 20px; }
 
-  .testimonials__title { font-size: 36px; line-height: 41px; letter-spacing: -1.2px; }
+  .testimonials__title { font-size: 38px; line-height: 43px; letter-spacing: -1.2px; }  /* matches about/team title at this breakpoint — same tier */
   .testimonial-card__quote { font-size: 19px; line-height: 29px; }
 
   .faq__grid { grid-template-columns: 1fr; gap: 48px; }
   .faq__title { margin-top: 18px; font-size: 38px; line-height: 43px; letter-spacing: -1.4px; max-width: 480px; }
-  .faq-item summary { height: auto; padding: 30px 0; font-size: 19px; }
+  .faq-item summary { height: auto; padding: 30px 0; font-size: 18px; }
 
   .cta__panel { padding: 72px 40px; }
   /* The serif-italic line needs more room than the sans lines above it. */
@@ -1705,7 +1734,7 @@ em {
     margin-top: 8px;
     margin-left: 64px;
     font-size: 14px;
-    line-height: 23.8px;
+    line-height: 24px;
     color: var(--body);
   }
   .journey-detail { display: none; }
@@ -1720,7 +1749,7 @@ em {
   .testimonial-card figcaption { margin-top: 22px; }
 
   .faq__title { font-size: 30px; line-height: 34px; letter-spacing: -1px; }
-  .faq-item summary { padding: 26px 0; font-size: 17px; gap: 16px; }
+  .faq-item summary { padding: 26px 0; font-size: 18px; gap: 16px; }
   .faq-item__icon { width: 32px; height: 32px; }
 
   /* Figma puts the panel 12px from the edge, not on the page gutter — that
