@@ -33,7 +33,7 @@ var EASE_OUT = "cubic-bezier(0.22, 0.61, 0.36, 1)";
   var panels = Array.prototype.slice.call(section.querySelectorAll(".journey-detail__panel"));
   if (!list || !steps.length) return;
 
-  var pinnedQuery = window.matchMedia("(min-width: 768px) and (min-height: 640px)");
+  var pinnedQuery = window.matchMedia("(min-width: 768px) and (min-height: 640px) and (prefers-reduced-motion: no-preference)");
   var total = steps.length;
   var current = -1;
 
@@ -113,6 +113,7 @@ function createCarousel(options) {
 
   var prevBtn = document.querySelector(options.prev);
   var nextBtn = document.querySelector(options.next);
+  var status = options.status ? document.querySelector(options.status) : null;
   var slidesQuery = window.matchMedia(options.slidesBelow || "(max-width: 1023px)");
   var index = 0;
 
@@ -135,6 +136,11 @@ function createCarousel(options) {
       card.classList.toggle("is-active", i === index);
     });
     layout();
+    if (status) {
+      status.textContent = options.statusText
+        ? options.statusText(cards[index], index, cards.length)
+        : (index + 1) + " de " + cards.length;
+    }
   }
 
   if (prevBtn) prevBtn.addEventListener("click", function () { setIndex(index - 1); });
@@ -166,6 +172,11 @@ createCarousel({
   track: ".team__track",
   prev: ".team__head .carousel-arrow:first-child",
   next: ".team__head .carousel-arrow:last-child",
+  status: "[data-team-status]",
+  statusText: function (card, index, total) {
+    var name = card.querySelector(".team-card__name");
+    return (name ? name.textContent : "Dentista " + (index + 1)) + " — " + (index + 1) + " de " + total;
+  },
   clickable: true,
   start: 1
 });
@@ -175,6 +186,10 @@ createCarousel({
   track: ".testimonials__track",
   prev: ".testimonials__arrows .carousel-arrow:first-child",
   next: ".testimonials__arrows .carousel-arrow:last-child",
+  status: "[data-testimonials-status]",
+  statusText: function (card, index, total) {
+    return "Depoimento " + (index + 1) + " de " + total;
+  },
   slidesBelow: "(max-width: 1279px)",
   start: 1
 });
@@ -278,7 +293,17 @@ createCarousel({
   function setPos(value) {
     var pct = Math.round(Math.max(0, Math.min(100, value)) * 100) / 100;
     compare.style.setProperty("--pos", pct + "%");
-    if (range) range.value = pct;
+    // Each chip labels one side of the frame; once its side has shrunk to
+    // almost nothing, showing that label over the other photo is a lie.
+    compare.style.setProperty("--before-op", Math.max(0, Math.min(1, pct / 8)).toFixed(2));
+    compare.style.setProperty("--after-op", Math.max(0, Math.min(1, (100 - pct) / 8)).toFixed(2));
+    if (range) {
+      range.value = pct;
+      range.setAttribute(
+        "aria-valuetext",
+        "Antes em " + Math.round(pct) + "%, depois em " + Math.round(100 - pct) + "%"
+      );
+    }
   }
 
   function pctFromX(clientX) {
@@ -448,54 +473,40 @@ createCarousel({
 })();
 
 /* ------------------------------------------------------------------
-   Eased wheel scrolling. Only where it belongs: pointer devices, which
-   have no inertia of their own. Touch and reduced-motion keep the
-   native behaviour. The real scroll position is still what moves, so
-   sticky and pinned sections keep working.
+   Mobile sticky action bar — revealed once the hero has scrolled out
+   of view. Hidden (not just invisible) while off-screen, so it is
+   never a keyboard/screen-reader stop when it cannot be seen. Driven
+   by scroll position, like the rest of the file, rather than
+   IntersectionObserver — one fewer API to depend on for something
+   this simple.
    ------------------------------------------------------------------ */
 (function () {
-  var finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
-  if (REDUCED || !finePointer.matches) return;
+  var bar = document.querySelector(".sticky-cta");
+  var hero = document.querySelector(".hero");
+  if (!bar || !hero) return;
 
-  var target = window.scrollY;
-  var current = target;
-  var running = false;
-  var EASE = 0.14;
+  var links = Array.prototype.slice.call(bar.querySelectorAll("a"));
+  var shown = false;
 
-  function limit() {
-    return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  function setVisible(visible) {
+    if (visible === shown) return;
+    shown = visible;
+    bar.classList.toggle("is-visible", visible);
+    bar.setAttribute("aria-hidden", String(!visible));
+    links.forEach(function (link) {
+      if (visible) link.removeAttribute("tabindex");
+      else link.setAttribute("tabindex", "-1");
+    });
   }
 
-  function frame() {
-    current += (target - current) * EASE;
-    if (Math.abs(target - current) < 0.4) {
-      current = target;
-      running = false;
-    }
-    // 'instant' overrides the smooth scroll-behavior used for anchor jumps.
-    window.scrollTo({ top: current, behavior: "instant" });
-    if (running) requestAnimationFrame(frame);
+  // A single boolean threshold, not a continuous read-then-write like the
+  // parallax and pinned-scroll effects above — cheap enough to run on every
+  // scroll event without a rAF throttle.
+  function update() {
+    setVisible(hero.getBoundingClientRect().bottom <= 0);
   }
 
-  window.addEventListener("wheel", function (event) {
-    if (event.ctrlKey || event.metaKey) return;      // pinch zoom
-    event.preventDefault();
-
-    var step = event.deltaY;
-    if (event.deltaMode === 1) step *= 16;            // lines
-    else if (event.deltaMode === 2) step *= window.innerHeight;
-
-    target = Math.max(0, Math.min(limit(), target + step));
-    if (!running) {
-      running = true;
-      requestAnimationFrame(frame);
-    }
-  }, { passive: false });
-
-  // Anything we did not drive — keyboard, anchors, the scrollbar — resyncs.
-  window.addEventListener("scroll", function () {
-    if (!running) {
-      target = current = window.scrollY;
-    }
-  }, { passive: true });
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update);
+  update();
 })();
