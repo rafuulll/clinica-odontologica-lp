@@ -423,32 +423,66 @@ em {
 }
 .about__inner .btn { margin-top: 35px; }
 
-/* All four share one box: same width, same aspect ratio, and a single
-   margin per row — so each pair lines up and no photo reads bigger than
-   the others. The source files carry their tilt and a paper-coloured
-   margin baked in (ratios 1.10–1.21); a 1.15 box crops at most 2.3% per
-   side, which stays inside that margin and never clips the photo itself. */
+/* Each source file is a paper-coloured canvas with the photo tilted and baked
+   into it. That canvas colour is the page background, so only the photo inside
+   is ever visible — the canvas can be any size and sit at any angle for free.
+   So the layout is driven by the photo, not by the file. Measured per file
+   (minimum-area rectangle over the non-background pixels):
+
+     slot   file       canvas    baked tilt   photo width
+     1 TL   about-3    285x253     -6.4deg       221.3
+     2 TR   about-1    288x239     +8.1deg       201.1
+     3 BL   about-2    267x222     +8.5deg       202.7
+     4 BR   about-4    298x270    -14.4deg       216.3
+
+   The four photos have genuinely different ratios (1.056–1.151), so no single
+   scale can equalise both axes without cropping into the picture. Matching the
+   geometric mean instead splits the residual evenly: identical area, and ~4%
+   on each axis rather than 0% on one and 9% on the other.
+
+   --pw    nominal photo size (its geometric mean), as a % of the section width
+   --k     canvasW/photoGM, so width:calc(pw*k) renders every photo that size
+   --ar    the canvas's own ratio, so nothing is ever cropped
+   --spin  the correction that brings each baked tilt to a shared 8deg
+   --a/--b/--c  put each photo's centroid on the shared column and row lines,
+           accounting for how the rotation moves that centroid
+
+   Because every one of these is a plain number and --pw/--col/--row are
+   percentages of the section width, one set of constants holds at every
+   breakpoint — only the five percentages below change. */
 .about__photo {
   position: absolute;
-  border-radius: 12px;
   object-fit: cover;
-  width: var(--photo-w);
-  aspect-ratio: 1.15;
+  width: calc(var(--pw) * var(--k));
+  aspect-ratio: var(--ar);
   height: auto;
+  transform: rotate(var(--spin));
 }
-.about__photos--top    .about__photo { top: 0;    margin-top: var(--photo-top); }
-.about__photos--bottom .about__photo { bottom: 0; margin-bottom: var(--photo-bottom); }
+.about__photo--1 { --ar: 1.1265; --k: 1.3705; --spin: -1.60deg; --a: 0.6639; --b: 0.6927; --c: 0.5240; }
+.about__photo--2 { --ar: 1.2050; --k: 1.4780; --spin: -0.10deg; --a: 0.7074; --b: 0.6413; --c: 0.5853; }
+.about__photo--3 { --ar: 1.2027; --k: 1.3538; --spin: -0.50deg; --a: 0.6134; --b: 0.5458; --c: 0.5798; }
+.about__photo--4 { --ar: 1.1037; --k: 1.4782; --spin:  6.45deg; --a: 0.7542; --b: 0.6284; --c: 0.7109; }
 
-/* Desktop — % of the 1920px frame */
-.about {
-  --photo-w: 14.5%;
-  --photo-top: 2.5%;
-  --photo-bottom: 7.34%;
-}
 .about__photo--1,
-.about__photo--3 { left: 17.00%; }
+.about__photo--3 { left: calc(var(--col-l) - var(--pw) * var(--a)); }
 .about__photo--2,
-.about__photo--4 { left: 68.83%; }
+.about__photo--4 { left: calc(var(--col-r) - var(--pw) * var(--a)); }
+.about__photos--top    .about__photo { top: 0;    margin-top:    calc(var(--row-t) - var(--pw) * var(--b)); }
+.about__photos--bottom .about__photo { bottom: 0; margin-bottom: calc(var(--row-b) - var(--pw) * var(--c)); }
+
+/* Desktop — % of the 1920px frame.
+   The copy column is a fixed 572px, so the side gutter the photos live in
+   shrinks faster than any plain percentage does: columns tuned for 1920 run
+   into the paragraph by ~1330px. Tracking the gutter instead keeps the same
+   inset at 1920 and walks the photos outward as the viewport narrows, so the
+   clearance holds all the way down to the tablet breakpoint. */
+.about {
+  --pw:    10.5%;
+  --col-l: clamp(13%, 35.5% - 220.5px, 26%);
+  --col-r: calc(100% - var(--col-l));
+  --row-t:  9.5%;
+  --row-b: 13.9%;
+}
 
 /* ============================================================
    SERVICES — editorial index
@@ -1399,15 +1433,12 @@ em {
   .about {
     padding-top: 50%;
     padding-bottom: 29.36%;
-    --photo-w: 23%;
-    --photo-top: 23.18%;
-    --photo-bottom: 5.92%;
+    --pw:    16.6%;
+    --col-l: 16.3%;
+    --col-r: 83.4%;
+    --row-t: 34.1%;
+    --row-b: 16.4%;
   }
-  .about__photo--1,
-  .about__photo--3 { left:  5.34%; }
-  .about__photo--2,
-  .about__photo--4 { left: 71.80%; }
-  .about__photo { border-radius: 18px; }
   .about__title { font-size: 38px; line-height: 43px; letter-spacing: -1.4px; }
   .about__paragraph { margin-top: 24px; font-size: 16px; line-height: 27px; }
   .about__inner .btn { margin-top: 32px; }
@@ -1547,15 +1578,12 @@ em {
   .about {
     padding-top: 84.3%;
     padding-bottom: 59.28%;
-    --photo-w: 41.87%;
-    --photo-top: 33.60%;
-    --photo-bottom: 15.01%;
+    --pw:    30.3%;
+    --col-l: 15.5%;
+    --col-r: 85.2%;
+    --row-t: 53.5%;
+    --row-b: 34.1%;
   }
-  .about__photo { border-radius: 16px; }
-  .about__photo--1,
-  .about__photo--3 { left: -4.50%; }
-  .about__photo--2,
-  .about__photo--4 { left: 64.13%; }
   .about__title { font-size: 30px; line-height: 34px; letter-spacing: -1px; }
   .about__paragraph { margin-top: 20px; font-size: 15px; line-height: 25.5px; }
 
