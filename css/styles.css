@@ -29,6 +29,8 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 html {
+  /* Native smoothing is the fallback. When the JS easing takes over it drives
+     anchor jumps itself, and leaving this on would animate twice. */
   scroll-behavior: smooth;
   /* `hidden` on <body> alone does not stop the document from scrolling
      sideways on iOS Safari. `clip` on the root propagates to the viewport
@@ -38,6 +40,7 @@ html {
   overflow-x: hidden;
   overflow-x: clip;
 }
+html.has-smooth-scroll { scroll-behavior: auto; }
 body {
   margin: 0;
   background: var(--paper);
@@ -136,24 +139,96 @@ em {
 /* ------------------------------------------------------------
    Buttons and links
    ------------------------------------------------------------ */
+/* Primary action. At rest it is a pale pill with a navy disc at its head;
+   on hover that disc floods the whole pill while the label and the arrow
+   each roll over to a second copy. Both copies sit in the same grid cell
+   inside an overflow-hidden window, so the swap reads as one movement
+   rather than a crossfade. */
 .btn {
+  --btn-h: 56px;
+  --btn-disc: 44px;
+  --btn-pad: 6px;
+  --btn-arrow: 17px;
+  position: relative;
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
-  gap: 10px;
-  padding: 16px 30px;
+  gap: 14px;
+  height: var(--btn-h);
+  padding: var(--btn-pad) 28px var(--btn-pad) var(--btn-pad);
   border-radius: 999px;
-  background: var(--navy);
-  color: var(--paper);
+  background: #fff;
+  color: var(--ink);
   font-size: 15px;
   font-weight: 500;
+  letter-spacing: -0.1px;
   white-space: nowrap;
-  transition: background 0.4s var(--ease);
+  overflow: hidden;
 }
-.btn:hover { background: #16233f; }
-.btn span { transition: transform 0.4s var(--ease); }
-.btn:hover span { transform: translateX(4px); }
-.btn--sm { padding: 12px 22px; font-size: 14px; }
+.btn::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: var(--btn-pad);
+  bottom: var(--btn-pad);
+  left: var(--btn-pad);
+  width: var(--btn-disc);
+  border-radius: 999px;
+  background: var(--navy);
+  transition: width 0.55s var(--ease);
+}
+.btn:hover::before,
+.btn:focus-visible::before { width: calc(100% - var(--btn-pad) * 2); }
+
+.btn__icon {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--btn-disc);
+  height: var(--btn-disc);
+  overflow: hidden;
+  color: var(--paper);
+}
+.btn__icon svg {
+  grid-area: 1 / 1;
+  width: var(--btn-arrow);
+  height: var(--btn-arrow);
+  transition: transform 0.55s var(--ease);
+}
+/* the incoming arrow waits off the bottom-left corner */
+.btn__icon svg + svg { transform: translate(-135%, 135%); }
+.btn:hover .btn__icon svg:first-child,
+.btn:focus-visible .btn__icon svg:first-child { transform: translate(135%, -135%); }
+.btn:hover .btn__icon svg + svg,
+.btn:focus-visible .btn__icon svg + svg { transform: none; }
+
+.btn__label {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  overflow: hidden;
+}
+.btn__label span {
+  grid-area: 1 / 1;
+  transition: transform 0.55s var(--ease), color 0.55s var(--ease);
+}
+.btn__label span + span { transform: translateY(110%); color: var(--paper); }
+.btn:hover .btn__label span:first-child,
+.btn:focus-visible .btn__label span:first-child { transform: translateY(-110%); }
+.btn:hover .btn__label span + span,
+.btn:focus-visible .btn__label span + span { transform: none; }
+
+.btn--sm {
+  --btn-h: 44px;
+  --btn-disc: 34px;
+  --btn-pad: 5px;
+  --btn-arrow: 14px;
+  gap: 10px;
+  padding-right: 20px;
+  font-size: 14px;
+}
 
 .link-underline {
   display: inline-flex;
@@ -221,10 +296,8 @@ em {
 .mobile-nav a:active { color: var(--ink); }
 .mobile-nav__cta {
   margin-top: 24px;
-  align-self: stretch;
-  justify-content: center;
+  align-self: flex-start;
   border-bottom: none;
-  color: var(--paper);
 }
 
 /* ------------------------------------------------------------
@@ -1553,9 +1626,10 @@ em {
   .hero__inner { padding-top: 36px; }
   .hero__title { font-size: 42px; line-height: 45px; letter-spacing: -1.6px; }
   .hero__subtitle { margin-top: 20px; font-size: 15px; line-height: 25.5px; }
-  .hero__actions { margin-top: 28px; flex-direction: column; align-items: stretch; gap: 18px; }
-  .hero__actions .btn { justify-content: center; }
-  .hero__actions .link-underline { align-self: center; }
+  /* The pill is sized to its content and its disc is anchored to the leading
+     edge, so stretching it would strand the arrow in the middle. */
+  .hero__actions { margin-top: 28px; flex-direction: column; align-items: flex-start; gap: 20px; }
+  .hero__actions .link-underline { align-self: flex-start; }
   /* The photo bleeds past both edges and is cropped by the viewport, fading
      into the paper top and bottom — the Figma mobile frame. */
   .hero__photo {

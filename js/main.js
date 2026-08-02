@@ -11,9 +11,24 @@ var EASE_OUT = "cubic-bezier(0.22, 0.61, 0.36, 1)";
   var mobileNav = document.querySelector(".mobile-nav");
   if (!menuBtn || !mobileNav) return;
 
+  function setOpen(open) {
+    mobileNav.classList.toggle("is-open", open);
+    menuBtn.setAttribute("aria-expanded", String(open));
+  }
+
   menuBtn.addEventListener("click", function () {
-    var isOpen = mobileNav.classList.toggle("is-open");
-    menuBtn.setAttribute("aria-expanded", String(isOpen));
+    setOpen(!mobileNav.classList.contains("is-open"));
+  });
+
+  // Escape is the expected way out of an open menu, and following a link
+  // should never leave the panel expanded over the section it jumped to.
+  document.addEventListener("keydown", function (event) {
+    if (event.key !== "Escape" || !mobileNav.classList.contains("is-open")) return;
+    setOpen(false);
+    menuBtn.focus();
+  });
+  mobileNav.addEventListener("click", function (event) {
+    if (event.target.closest("a")) setOpen(false);
   });
 })();
 
@@ -470,6 +485,83 @@ createCarousel({
     observer.disconnect();
     document.documentElement.classList.remove("js-reveal");
   }, 2500);
+})();
+
+/* ------------------------------------------------------------------
+   Smooth scrolling, in the spirit of Lenis: the wheel moves a target and
+   the real scroll position eases toward it each frame, so sticky and
+   pinned sections keep working off ordinary scroll events.
+
+   Deliberately narrow: pointer devices only — touch already has momentum
+   of its own and feels laggy if we add more — and off entirely under
+   reduced motion. Keyboard, scrollbar and find-in-page all resync rather
+   than fight it, and in-page anchors are routed through the same easing
+   so CSS scroll-behavior never animates on top of this one.
+   ------------------------------------------------------------------ */
+(function () {
+  var finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+  if (REDUCED || !finePointer.matches) return;
+
+  var LERP = 0.09;
+  var target = window.scrollY;
+  var current = target;
+  var running = false;
+
+  document.documentElement.classList.add("has-smooth-scroll");
+
+  function maxScroll() {
+    return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  }
+
+  function frame() {
+    current += (target - current) * LERP;
+    if (Math.abs(target - current) < 0.5) {
+      current = target;
+      running = false;
+    }
+    window.scrollTo(0, current);
+    if (running) requestAnimationFrame(frame);
+  }
+
+  function run() {
+    if (running) return;
+    running = true;
+    requestAnimationFrame(frame);
+  }
+
+  function scrollTo(y) {
+    target = Math.max(0, Math.min(maxScroll(), y));
+    run();
+  }
+
+  window.addEventListener("wheel", function (event) {
+    if (event.ctrlKey || event.metaKey) return;        // pinch zoom
+    event.preventDefault();
+    var step = event.deltaY;
+    if (event.deltaMode === 1) step *= 16;             // lines
+    else if (event.deltaMode === 2) step *= window.innerHeight;
+    scrollTo(target + step);
+  }, { passive: false });
+
+  // Anything we did not drive — keyboard, scrollbar, focus — resyncs.
+  window.addEventListener("scroll", function () {
+    if (!running) target = current = window.scrollY;
+  }, { passive: true });
+  window.addEventListener("resize", function () {
+    target = current = window.scrollY;
+  });
+
+  document.addEventListener("click", function (event) {
+    var link = event.target.closest && event.target.closest('a[href^="#"]');
+    if (!link) return;
+    var hash = link.getAttribute("href");
+    if (!hash || hash === "#") return;
+    var dest = document.getElementById(hash.slice(1));
+    if (!dest) return;
+    event.preventDefault();
+    scrollTo(window.scrollY + dest.getBoundingClientRect().top);
+    history.pushState(null, "", hash);
+  });
 })();
 
 /* ------------------------------------------------------------------
