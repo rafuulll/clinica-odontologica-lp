@@ -48,7 +48,19 @@ var EASE_OUT = "cubic-bezier(0.22, 0.61, 0.36, 1)";
   var panels = Array.prototype.slice.call(section.querySelectorAll(".journey-detail__panel"));
   if (!list || !steps.length) return;
 
-  var pinnedQuery = window.matchMedia("(min-width: 768px) and (min-height: 640px) and (prefers-reduced-motion: no-preference)");
+  // Whether the stage is pinned is a CSS decision (see the media query in
+  // styles.css). Read it back off the element rather than restating the
+  // breakpoint here: a duplicated query that drifts out of sync would leave
+  // the stacked logic running against a sticky stage, where no step ever
+  // crosses the reading line and the rail silently freezes on step 1.
+  var stage = section.querySelector(".journey__stage");
+  function isPinned() {
+    return !!stage && window.getComputedStyle(stage).position === "sticky";
+  }
+
+  // Reduced motion turns pinning off without any resize, so it needs its own
+  // listener; every other trigger (width, height) already fires resize.
+  var motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   var total = steps.length;
   var current = -1;
 
@@ -98,14 +110,14 @@ var EASE_OUT = "cubic-bezier(0.22, 0.61, 0.36, 1)";
   }
 
   function apply() {
-    update = pinnedQuery.matches ? updatePinned : updateStacked;
+    update = isPinned() ? updatePinned : updateStacked;
     current = -1;
     update();
   }
 
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", apply);
-  if (pinnedQuery.addEventListener) pinnedQuery.addEventListener("change", apply);
+  if (motionQuery.addEventListener) motionQuery.addEventListener("change", apply);
   apply();
 })();
 

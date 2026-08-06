@@ -1009,7 +1009,11 @@ em {
 
 @media (min-width: 768px) and (min-height: 640px) and (prefers-reduced-motion: no-preference) {
   .journey {
-    height: 200vh;
+    /* 300vh leaves 200vh of runway once the 100vh stage is subtracted — about
+       half a viewport of scroll per step. Less than this and a single wheel
+       flick clears a step, so the pin engages and releases almost at once and
+       reads as if it never locked at all. */
+    height: 300vh;
     padding-top: 0;
   }
   .journey__stage {
@@ -1591,7 +1595,11 @@ em {
     transition: transform 0.6s var(--ease);
     will-change: transform;
     touch-action: pan-y;   /* browser keeps vertical scroll, JS takes sideways */
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
   }
+  .team__track:active { cursor: grabbing; }
   /* Every card keeps the same box; only the neighbours are scaled down.
      Animating `height` reflows the whole flex line, which is what made all
      four cards jump on each change — a transform touches no layout at all,
